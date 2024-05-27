@@ -49,16 +49,16 @@ bootJar {
 }
 
 jib {
-//	from {
-//		image = 'mcr.microsoft.com/openjdk/jdk:17-ubuntu'
-//	}
-//	to{
-//		image = 'venuacr.azurecr.io/employee:0.0.1-SNAPSHOT'
-//		auth {
-//			username = "YOUR-ACR"
-//			password = "YOUR-ACR-PASSWORD"
-//		}
-//	}
+	from {
+		image = 'mcr.microsoft.com/openjdk/jdk:17-ubuntu'
+	}
+	to{
+		image = 'YOUR-ACR.azurecr.io/employee:0.0.1-SNAPSHOT'
+		auth {
+			username = "YOUR-ACR"
+			password = "YOUR-ACR-PASSWORD"
+		}
+	}
 	extraDirectories {
 		paths {
 			path {

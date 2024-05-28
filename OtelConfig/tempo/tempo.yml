@@ -1,38 +1,47 @@
 server:
   http_listen_port: 3200
 
+#The distributor component is responsible for receiving trace data from various sources
+# and distributing it to the appropriate components within Tempo for processing and storage.
 distributor:
-  receivers:
+  receivers: #defines the protocols and endpoints through which the distributor can receive incoming trace data.
     otlp:
       protocols:
         http:
         grpc:
 
+#Traces are collected and buffered in memory for up to 5 minutes.
 ingester:
-  max_block_duration: 5m
+  max_block_duration: 5m #Every 5 minutes, the accumulated traces are written to disk as a block.
 
+#Blocks written by the ingester are retained for 1 hour.
+#After 1 hour, these blocks are compacted. Compaction merges smaller blocks into larger ones, reducing the total number of blocks.
+#This process helps optimize storage and improves the performance of trace queries by minimizing the number of blocks that need to be searched.
 compactor:
   compaction:
     block_retention: 1h
 
+#metrics_generator section is responsible for generating metrics from trace data and
+#  sending these metrics to a specified endpoint.
 metrics_generator:
   registry:
     external_labels:
       source: tempo
-      cluster: docker-compose
+      cluster: YOUR_CLUSTER_NAME #Indicates that the metrics are from a cluster managed
   storage:
-    path: /tmp/tempo/generator/wal
+    path: /tmp/tempo/generator/wal #WAL is used to ensure data durability and to recover metrics in case of a restart or crash.
     remote_write:
       - url: http://prometheus:9090/api/v1/write
         send_exemplars: true
 
 storage:
   trace:
-    backend: local
+    backend: local #Specifies that the trace data backend storage is local.
     wal:
-      path: /tmp/tempo/wal
+      path: /tmp/tempo/wal # Specifies the Write-Ahead Log (WAL) path.
     local:
       path: /tmp/tempo/blocks
 
+#Defines additional processors for generating metrics, such as service graphs and span metrics.
 overrides:
   metrics_generator_processors: [service-graphs, span-metrics]

@@ -1,24 +1,28 @@
+#defines how the collector receives telemetry data (metrics, traces, logs) from various sources.
 receivers:
+  #The otlp receiver will accept telemetry data over both gRPC and HTTP.
   otlp:
     protocols:
       grpc:
 
+#define processing steps that telemetry data goes through before it is exported.
 processors:
-  # batch metrics before sending to reduce API usage
-  batch:
-    send_batch_max_size: 1000
+  batch: # batch metrics before sending to reduce API usage
+    send_batch_max_size: 1000  #means 1000 telemetry items
     send_batch_size: 100
     timeout: 10s
 
 exporters:
-  prometheusremotewrite:
+  prometheusremotewrite: #Sends metrics data to a Prometheus instance using the remote write API.
     endpoint: "http://prometheus:9090/api/v1/write"
 
+  #Exposes metrics in a format that Prometheus can scrape.
   prometheus:
     endpoint: "0.0.0.0:8889"
     enable_open_metrics: true
 
-  otlp/tempo:
+  # otlp/tempo explicitly states that this is an OTLP exporter for Tempo, making the configuration easier to understand and maintain.
+  otlp/tempo: #Specifies the network address where the Tempo instance is listening for incoming OTLP data.
     endpoint: "http://tempo:4317"
     tls:
       insecure: true
@@ -27,6 +31,7 @@ exporters:
     endpoint: "http://loki:3100/loki/api/v1/push"
 
 service:
+  #order of processors dictates the order in which data is processed
   pipelines:
     metrics:
       receivers: [otlp]

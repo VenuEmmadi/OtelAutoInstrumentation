@@ -9,9 +9,11 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       OTEL_RESOURCE_ATTRIBUTES: "service=employee-service,env=dev"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://collector:4317"
-      # Logs are disabled by default
+
+      # Logs are disabled by default Select the OpenTelemetry exporter for logs (default)
       OTEL_LOGS_EXPORTER: "otlp"
     ports:
+      #port 8080 on the host machine is mapped to port 8080 inside the Docker container
       - "8080:8080"
     depends_on:
       - postgres
@@ -58,7 +60,11 @@ services:
       - ./OtelConfig/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     command:
       - --config.file=/etc/prometheus/prometheus.yml
+      #The exemplar-storage feature allows Prometheus to store exemplars, which are special types of data points used to associate
+      #metric data with trace data. This can be useful for correlating metrics with traces in distributed systems
+      #to provide more detailed insights into performance issues.
       - --enable-feature=exemplar-storage
+      #This option allows Prometheus to accept remote write requests.
       - --web.enable-remote-write-receiver
     restart: always
     ports:
